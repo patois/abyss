@@ -33,13 +33,15 @@ class abyss_filter_t:
 def load_filters(reload=False):
     global FILTERS
 
-    print("%s: loading filters..." % (PLUGIN_NAME))
+    print("%s: %sloading filters..." % (PLUGIN_NAME, "re" if reload else ""))
+    if reload:
+        FILTERS = {}
     filterdir = os.path.join(os.path.dirname(__file__), FILTER_DIR)
     if os.path.exists(filterdir):
         for entry in os.listdir(filterdir):
             if entry.lower().endswith(".py") and entry.lower() != "__init__.py":
                 mod, ext = os.path.splitext(entry)
-                if mod not in FILTERS or reload:
+                if mod not in FILTERS:
                     try:
                         ida_idaapi.require("%s.%s" % (FILTER_DIR, mod), FILTER_DIR)
                         flt = sys.modules["%s.%s" % (FILTER_DIR, mod)].FILTER_INIT()
