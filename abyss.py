@@ -122,8 +122,11 @@ class abyss_plugin_t(ida_idaapi.plugin_t):
         load_filters(reload=True)
 
     def term(self):
-        self.ui_hooks.unhook()
-        self.hr_hooks.unhook()
+        try:
+            self.ui_hooks.unhook()
+            self.hr_hooks.unhook()
+        except:
+            pass
 
 def PLUGIN_ENTRY():
     return abyss_plugin_t()
