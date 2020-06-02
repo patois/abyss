@@ -69,7 +69,7 @@ class ui_event_t(kw.UI_Hooks):
                         obj._set_activated(not obj._is_activated())
                         vu = hr.get_widget_vdui(ctx.widget)
                         if vu:
-                            vu.refresh_view(False)
+                            vu.refresh_view(not obj._is_activated())
                         return 1
 
                     def update(self, ctx):
