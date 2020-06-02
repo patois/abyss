@@ -22,7 +22,7 @@ class color_addr_info_t(abyss_filter_t):
         i = 0
         for sl in pc:
             sl.line = replace_addr_tags(sl.line)           
-        return
+        return 0
 
 def FILTER_INIT():
     return color_addr_info_t()
