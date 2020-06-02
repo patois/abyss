@@ -14,20 +14,23 @@ FILTERS = {}
 # ----------------------------------------------------------------------------
 class abyss_filter_t:
     def __init__(self):
-        self.active = False
+        self.activated = False
         return
 
+    def process_printfunc(self, cfunc, printer):
+        return 0
+
     def process_text(self, vu):
-        pass
+        return 0
 
     def process_curpos(self, vu):
-        pass
+        return 0
 
-    def _is_active(self):
-        return self.active
+    def _is_activated(self):
+        return self.activated
 
-    def _set_active(self, active):
-        self.active = active
+    def _set_activated(self, active):
+        self.activated = active
 
 # ----------------------------------------------------------------------------
 def load_filters(reload=False):
@@ -63,7 +66,7 @@ class ui_event_t(kw.UI_Hooks):
 
                     def activate(self, ctx):
                         obj = FILTERS[self.name]
-                        obj._set_active(not obj._is_active())
+                        obj._set_activated(not obj._is_activated())
                         vu = hr.get_widget_vdui(ctx.widget)
                         if vu:
                             vu.refresh_view(False)
@@ -79,7 +82,7 @@ class ui_event_t(kw.UI_Hooks):
                         FilterHandler(name),
                         None,
                         None,
-                        34 if obj._is_active() else -1)
+                        34 if obj._is_activated() else -1)
                     kw.attach_dynamic_action_to_popup(widget, popup_handle, action_desc, POPUP_ENTRY)
 
 # ----------------------------------------------------------------------------
@@ -87,15 +90,21 @@ class hx_event_t(hr.Hexrays_Hooks):
     def __init__(self):
         hr.Hexrays_Hooks.__init__(self)
 
+    def print_func(self, cfunc, printer):
+        for name, obj in FILTERS.items():
+            if obj._is_activated():
+                obj.process_printfunc(cfunc, printer)
+        return 0
+
     def text_ready(self, vu):
         for name, obj in FILTERS.items():
-            if obj._is_active():
+            if obj._is_activated():
                 obj.process_text(vu)
         return 0
 
     def curpos(self, vu):
         for name, obj in FILTERS.items():
-            if obj._is_active():
+            if obj._is_activated():
                 obj.process_curpos(vu)
         return 0
         
