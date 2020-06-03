@@ -2,7 +2,9 @@ from abyss import abyss_filter_t
 import ida_lines
 
 class lvars_info_t(abyss_filter_t):
-    """renames local variables"""
+    """appends a postfix to local variables that indicates
+    each variable's type (*r*egister or *s*tack) and its size
+    in bytes."""
 
     def process_printfunc(self, cfunc, printer):
         lvars = cfunc.get_lvars()

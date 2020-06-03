@@ -11,7 +11,8 @@ SIGNED_EXPR = [
 FMT = "%c%c%" + ("0%dX" % ida_lines.COLOR_ADDR_SIZE)
 
 class signed_op_replacer_t(abyss_filter_t):
-    """insert comments for common unsigned expressions into decompiled code"""
+    """insert comments into the pseudo-c code.
+    comments indicate the use of signed operators."""
 
     def __init__(self):
         abyss_filter_t.__init__(self)

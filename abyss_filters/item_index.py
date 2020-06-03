@@ -15,8 +15,9 @@ def replace_addr_tags(s):
     return s
 
 class color_addr_info_t(abyss_filter_t):
-    """This filter assissts in development and debugging of
-    Hexrays plugins by prepending item indices"""
+    """This filter makes COLOR_ADDR tags visible in the
+    decompiled code (useful only to developers)."""
+
     def process_text(self, vu):
         pc = vu.cfunc.get_pseudocode()
         i = 0
