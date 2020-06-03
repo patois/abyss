@@ -16,7 +16,7 @@ class signed_op_replacer_t(abyss_filter_t):
 
     def __init__(self):
         abyss_filter_t.__init__(self)
-        self._set_activated(True)
+        self.set_activated(True)
         return
 
     def tag_signed_ops(self, cf, item_codes):

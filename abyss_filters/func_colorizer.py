@@ -10,7 +10,7 @@ class funcname_colorizer_t(abyss_filter_t):
 
     def __init__(self):
         abyss_filter_t.__init__(self)
-        self._set_activated(True)
+        self.set_activated(True)
         return
 
     def process_text(self, vu):
