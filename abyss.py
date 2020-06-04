@@ -140,6 +140,3 @@ class abyss_plugin_t(ida_idaapi.plugin_t):
 
 def PLUGIN_ENTRY():
     return abyss_plugin_t()
-
-if __name__ == "__main__":
-    print("abyss is an IDA Pro plugin, please see README for installation notes")

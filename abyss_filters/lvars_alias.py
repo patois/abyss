@@ -9,7 +9,7 @@ VAR_ASG_CALL_DETERMINISTIC = {
     "NTSTATUS": "status",
 }
 
-fDebug = False
+fDebug = True
 def debug(msg):
     if fDebug:
         print(msg)
