@@ -13,6 +13,9 @@ FILTERS = {}
 
 # ----------------------------------------------------------------------------
 class abyss_filter_t:
+    """every filter should inherit from this class and
+    override respective handlers/methods"""
+ 
     def __init__(self):
         self.set_activated(False)
         return
@@ -29,8 +32,9 @@ class abyss_filter_t:
     def is_activated(self):
         return self.activated
 
-    # Call set_activated(True) in your inherited script to enable it automatically when loading
     def set_activated(self, active):
+        """Call set_activated(True) within the constructor
+        of a filter script to enable it automatically when loading"""
         self.activated = active
 
 # ----------------------------------------------------------------------------
@@ -115,7 +119,8 @@ class abyss_plugin_t(ida_idaapi.plugin_t):
     comment = "Postprocess Hexrays Output"
     help = comment
     wanted_name = PLUGIN_NAME
-    wanted_hotkey = "Ctrl-Alt-R"    # allows reloading filter scripts while developing them
+    # allows reloading filter scripts while developing them
+    wanted_hotkey = "Ctrl-Alt-R"
 
     def init(self):
         if hr.init_hexrays_plugin():
