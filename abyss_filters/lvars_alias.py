@@ -1,5 +1,5 @@
 from abyss import abyss_filter_t
-import ida_lines, ida_hexrays, ida_name
+import ida_lines, ida_hexrays, ida_name, ida_pro
 
 VAR_ASG_VAR_SUFFIX = "_"
 VAR_ASG_CALL_PREFIX = "result_"
@@ -27,6 +27,12 @@ def set_var_unique_name(var_x, var_y, lvars):
     new_name = set_unique_name(var_x, new_name, lvars)
     debug("Renamed: %s (%s) = %s " % (old_name, new_name, var_y.name))
 
+def set_struct_member_unique_name(var_x, expr_y, lvars):
+    old_name = var_x.name
+    new_name = get_expr_name_and_member(expr_y)[1]
+    new_name = set_unique_name(var_x, new_name, lvars)
+    debug("Renamed: %s (%s) = %s " % (old_name, new_name, get_expr_name(expr_y)))
+
 def set_func_unique_name(var_x, func_name, lvars):
     old_name = var_x.name
     x_type = var_x.type()
@@ -49,6 +55,32 @@ def set_unique_name(var_x, new_name, lvars):
     var_x.name = new_name
     var_x.set_user_name()
     return new_name
+
+def get_expr_name(expr):
+    name = expr.print1(None)
+    name = ida_lines.tag_remove(name)
+    name = ida_pro.str2user(name)
+    return name
+
+def get_expr_name_and_member(expr):
+    name = get_expr_name(expr)
+    if "->" in name:
+        return name.split("->")
+    elif "." in name:
+        return name.split(".")
+    return None
+
+# XXX - There should be a better way than parsing the text to get the type
+def get_expr_struct_type(expr, lvars):
+    name = get_expr_name(expr)
+    if "->" in name:
+        var_name = name.split("->")[0]
+    elif "." in name:
+        var_name = name.split(".")[0]
+    for one in lvars:
+        if var_name == one.name:
+            return one.type()
+    return None
 
 class asg_visitor_t(ida_hexrays.ctree_visitor_t):
 
@@ -77,6 +109,17 @@ class asg_visitor_t(ida_hexrays.ctree_visitor_t):
                         set_var_unique_name(var_x, var_y, self.lvars)
                     else:
                         debug("Skipped: %s = %s " % (var_x.name, var_y.name))
+                # handle "x = something.y" types of assignments
+                elif e.y.op == ida_hexrays.cot_memref:
+                    pass
+                # handle "x = something->y" types of assignments
+                elif e.y.op == ida_hexrays.cot_memptr:
+                    #debug("Found: %s = [ %s (%s) and m = %d and ptrsize = %x ]" % (self.lvars[e.x.v.idx].name, get_expr_name_and_member(e.y), get_expr_struct_type(e.y, self.lvars), e.y.m, e.y.ptrsize))
+                    # get var index and lvar_t
+                    x_idx = e.x.v.idx
+                    var_x = self.lvars[x_idx]
+                    # rename x
+                    set_struct_member_unique_name(var_x, e.y, self.lvars)
                 # handle "x = y()" types of assignments
                 elif e.y.op == ida_hexrays.cot_call:
                     # get name of called function
