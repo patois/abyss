@@ -2,7 +2,7 @@ from abyss import abyss_filter_t
 import ida_lines, ida_name, ida_hexrays as hr
 
 VAR_ASG_VAR_SUFFIX = "_"
-VAR_ASG_CALL_PREFIX = "result_"
+VAR_ASG_CALL_PREFIX = "res_"
 
 # mapping a type string representation to a deterministic name to use
 VAR_ASG_CALL_DETERMINISTIC = {
@@ -10,9 +10,9 @@ VAR_ASG_CALL_DETERMINISTIC = {
 }
 
 fDebug = False
-def debug(msg):
+def debug_print(msg):
     if fDebug:
-        print(msg)
+        print("%s" % msg)
     return
 
 def debug_lvars(lvars):
@@ -27,7 +27,7 @@ def set_var_unique_name(var_x, var_y, lvars):
     old_name = var_x.name
     new_name = var_y.name + VAR_ASG_VAR_SUFFIX
     new_name = set_unique_name(var_x, new_name, lvars)
-    debug("Renamed: %s (%s) = %s " % (old_name, new_name, var_y.name))
+    debug_print("Renamed: %s (%s) = %s " % (old_name, new_name, var_y.name))
     return
 
 def set_func_unique_name(var_x, func_name, lvars):
@@ -38,7 +38,7 @@ def set_func_unique_name(var_x, func_name, lvars):
     else:
         new_name = VAR_ASG_CALL_PREFIX + func_name
     new_name = set_unique_name(var_x, new_name, lvars)
-    debug("Renamed: %s (%s) = %s(...) " % (old_name, new_name, func_name))
+    debug_print("Renamed: %s (%s) = %s(...) " % (old_name, new_name, func_name))
     return
 
 def set_unique_name(var_x, new_name, lvars):
@@ -76,7 +76,7 @@ class asg_visitor_t(hr.ctree_visitor_t):
                     var_x = self.lvars[x_idx]
                     var_y = self.lvars[y_idx]
                     """
-                    debug("Found: %s (user: %s, nice: %s) = %s (user: %s, nice: %s)" % (
+                    debug_print("Found: %s (user: %s, nice: %s) = %s (user: %s, nice: %s)" % (
                         var_x.name,
                         var_x.has_user_name,
                         var_x.has_nice_name,
@@ -89,7 +89,7 @@ class asg_visitor_t(hr.ctree_visitor_t):
                         # rename x
                         set_var_unique_name(var_x, var_y, self.lvars)
                     else:
-                        debug("Skipped: %s = %s " % (var_x.name, var_y.name))
+                        debug_print("Skipped: %s = %s " % (var_x.name, var_y.name))
                 # handle "x = y()" types of assignments
                 elif e.y.op in [hr.cot_call, hr.cot_cast]:
                     if e.y.op == hr.cot_call:
@@ -100,7 +100,8 @@ class asg_visitor_t(hr.ctree_visitor_t):
                         tmp_y = None
                     if tmp_y and tmp_y.x.op == hr.cot_obj:
                         # get name of called function
-                        func_name = ida_name.get_ea_name(tmp_y.x.obj_ea)
+                        func_name = ida_name.get_ea_name(tmp_y.x.obj_ea,
+                            ida_name.GN_VISIBLE | ida_name.GN_LOCAL)
                         # get var index and lvar_t
                         x_idx = e.x.v.idx
                         var_x = self.lvars[x_idx]
@@ -108,7 +109,7 @@ class asg_visitor_t(hr.ctree_visitor_t):
                             # rename x
                             set_func_unique_name(var_x, func_name, self.lvars)
                         else:
-                            debug("Skipped: %s = %s(...) " % (var_x.name, func_name))
+                            debug_print("Skipped: %s = %s(...) " % (var_x.name, func_name))
         return 0
 
 

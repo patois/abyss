@@ -1,6 +1,7 @@
 import ida_kernwin as kw
 import ida_hexrays as hr
 import ida_diskio, ida_idaapi
+from ida_auto import auto_wait
 import os, sys
 
 __author__ = "https://github.com/patois"
@@ -135,6 +136,7 @@ class abyss_plugin_t(ida_idaapi.plugin_t):
 
     def run(self, arg):
         load_filters(reload=True)
+        return
 
     def term(self):
         try:
@@ -142,6 +144,7 @@ class abyss_plugin_t(ida_idaapi.plugin_t):
             self.hr_hooks.unhook()
         except:
             pass
+        return
 
 def PLUGIN_ENTRY():
     return abyss_plugin_t()
