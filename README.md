@@ -22,7 +22,10 @@ the Ctrl-Alt-R keycombo reloads all filters dynamically.
 This allows for development of filters without having to
 restart IDA.
 
-## Example filters
+## Example filters (incomplete list)
+
+### lvars_alias.py (assign variables names depending on context)
+![abyss lvars alias gif](/rsrc/varrename.gif?raw=true)
 
 ### signed_ops.py (identify signed operators)
 ![abyss signedops gif](/rsrc/signedops.gif?raw=true)
