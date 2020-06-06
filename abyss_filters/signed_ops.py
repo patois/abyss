@@ -14,11 +14,6 @@ class signed_op_replacer_t(abyss_filter_t):
     """insert comments into the pseudo-c code.
     comments indicate the use of signed operators."""
 
-    def __init__(self):
-        abyss_filter_t.__init__(self)
-        self.set_activated(True)
-        return
-
     def tag_signed_ops(self, cf, item_codes):
         ci = hr.ctree_item_t()
         ccode = cf.get_pseudocode()

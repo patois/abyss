@@ -2,16 +2,11 @@ from abyss import abyss_filter_t
 import ida_lines, ida_pro
 
 FUNC_NAMES = [
-    "memcpy", "memmove", "strcpy", "malloc", "free",
-    "realloc", "sprintf"]
+    "memcpy", "memmove", "strcpy", "gets", "malloc", "free",
+    "realloc", "sprintf", "system", "popen"]
 
 class funcname_colorizer_t(abyss_filter_t):
     """example filter which makes function names stand out visually"""
-
-    def __init__(self):
-        abyss_filter_t.__init__(self)
-        self.set_activated(True)
-        return
 
     def process_text(self, vu):
         pc = vu.cfunc.get_pseudocode()
