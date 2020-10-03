@@ -11,7 +11,7 @@ POPUP_ENTRY = "%s/" % PLUGIN_NAME
 FILTER_DIR = "%s_filters" % PLUGIN_NAME
 CFG_FILENAME = "%s.cfg" % PLUGIN_NAME
 
-FILTERS = {}
+FILTERS = {$}
 
 # ----------------------------------------------------------------------------
 class abyss_filter_t:
