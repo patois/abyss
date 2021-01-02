@@ -20,7 +20,6 @@ class color_addr_info_t(abyss_filter_t):
 
     def process_text(self, vu):
         pc = vu.cfunc.get_pseudocode()
-        i = 0
         for sl in pc:
             sl.line = replace_addr_tags(sl.line)           
         return 0

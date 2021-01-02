@@ -123,12 +123,12 @@ class lvars_alias_t(abyss_filter_t):
 
     def __init__(self):
         abyss_filter_t.__init__(self)
-        #self.set_activated(True)
         return
 
-    def process_printfunc(self, cfunc, printer):
-        av = asg_visitor_t(cfunc)
-        av.apply_to(cfunc.body, None)
+    def process_maturity(self, cfunc, new_maturity):
+        if new_maturity == hr.CMAT_FINAL:
+            av = asg_visitor_t(cfunc)
+            av.apply_to(cfunc.body, None)
         return 0
 
 def FILTER_INIT():
