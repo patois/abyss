@@ -31,6 +31,9 @@ class abyss_filter_t:
     def process_curpos(self, vu):
         return 0
 
+    def process_maturity(self, cfunc, new_maturity):
+        return 0
+
     def is_activated(self):
         return self.activated
 
@@ -143,21 +146,26 @@ class hx_event_t(hr.Hexrays_Hooks):
     def print_func(self, cfunc, printer):
         for name, obj in FILTERS.items():
             if obj.is_activated():
-                obj.process_printfunc(cfunc, printer)
+                return obj.process_printfunc(cfunc, printer)
         return 0
 
     def text_ready(self, vu):
         for name, obj in FILTERS.items():
             if obj.is_activated():
-                obj.process_text(vu)
+                return obj.process_text(vu)
         return 0
 
     def curpos(self, vu):
         for name, obj in FILTERS.items():
             if obj.is_activated():
-                obj.process_curpos(vu)
+                return obj.process_curpos(vu)
         return 0
-        
+
+    def maturity(self, cfunc, new_maturity):
+        for name, obj in FILTERS.items():
+            if obj.is_activated():
+                return obj.process_maturity(cfunc, new_maturity)
+        return 0        
 # ----------------------------------------------------------------------------
 class abyss_plugin_t(ida_idaapi.plugin_t):
     flags = 0
