@@ -8,7 +8,7 @@ FUNC_NAMES = [
 class funcname_colorizer_t(abyss_filter_t):
     """example filter which makes function names stand out visually"""
 
-    def process_text(self, cfunc):
+    def func_printed_ev(self, cfunc):
         pc = cfunc.get_pseudocode()
         for sl in pc:
             for token in FUNC_NAMES:

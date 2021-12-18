@@ -6,7 +6,7 @@ class lvars_info_t(abyss_filter_t):
     each variable's type (*r*egister or *s*tack) and its size
     in bytes."""
 
-    def process_maturity(self, cfunc, new_maturity):
+    def maturity_ev(self, cfunc, new_maturity):
         if new_maturity == ida_hexrays.CMAT_FINAL:
             lvars = cfunc.get_lvars()
             for lvar in lvars:

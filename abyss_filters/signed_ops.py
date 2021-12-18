@@ -23,14 +23,14 @@ class signed_op_replacer_t(abyss_filter_t):
             for char_idx in range(len(sl.line)):
                 if cf.get_line_item(sl.line, char_idx, True, None, ci, None):
                     if ci.it.is_expr() and ci.e.op in item_codes:
-                        #print("%s: unsigned op. line %d, pos %d" % (__file__, line_idx+1, char_idx))
+                        #print("%s: signed op. line %d, pos %d" % (__file__, line_idx+1, char_idx))
                         items.append(ci.it.index)
             for item in list(dict.fromkeys(items)):
                 tag = FMT % (ida_lines.COLOR_ON, ida_lines.COLOR_ADDR, item)
                 sample = "/*signed*/"
                 sl.line = sl.line.replace(tag, tag+ida_lines.COLSTR(sample, ida_lines.SCOLOR_ERROR))
 
-    def process_text(self, cfunc):
+    def func_printed_ev(self, cfunc):
         self.tag_signed_ops(cfunc, SIGNED_EXPR)
         return 0
 

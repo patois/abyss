@@ -25,7 +25,7 @@ def replace_addr_tags(cfunc, s):
 class item_ctype_info_t(abyss_filter_t):
     """This filter prepends ctype names (useful only to developers)."""
 
-    def process_text(self, cfunc):
+    def func_printed_ev(self, cfunc):
         pc = cfunc.get_pseudocode()
         for sl in pc:
             sl.line = replace_addr_tags(cfunc, sl.line)           

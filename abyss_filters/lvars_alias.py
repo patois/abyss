@@ -125,7 +125,7 @@ class lvars_alias_t(abyss_filter_t):
         abyss_filter_t.__init__(self)
         return
 
-    def process_maturity(self, cfunc, new_maturity):
+    def maturity_ev(self, cfunc, new_maturity):
         if new_maturity == hr.CMAT_FINAL:
             av = asg_visitor_t(cfunc)
             av.apply_to(cfunc.body, None)
