@@ -3,7 +3,7 @@ import ida_lines as il
 import ida_hexrays
 import re
 
-def replace_addr_tags(vu, s):
+def replace_addr_tags(cfunc, s):
     tag = "%c%c" % (il.COLOR_ON, il.COLOR_ADDR)
     tag_size = len(tag)
     ti = {}
@@ -16,7 +16,7 @@ def replace_addr_tags(vu, s):
         a = ida_hexrays.ctree_anchor_t()
         a.value = idx
         if a.is_valid_anchor() and a.is_citem_anchor():
-            item = vu.cfunc.treeitems.at(a.get_index())
+            item = cfunc.treeitems.at(a.get_index())
             if item:
                 ctype_name = ida_hexrays.get_ctype_name(item.op)
                 s = s.replace(tag+addr, il.COLSTR("<%s>" % ctype_name, il.SCOLOR_AUTOCMT)+tag+addr)
@@ -25,10 +25,10 @@ def replace_addr_tags(vu, s):
 class item_ctype_info_t(abyss_filter_t):
     """This filter prepends ctype names (useful only to developers)."""
 
-    def process_text(self, vu):
-        pc = vu.cfunc.get_pseudocode()
+    def process_text(self, cfunc):
+        pc = cfunc.get_pseudocode()
         for sl in pc:
-            sl.line = replace_addr_tags(vu, sl.line)           
+            sl.line = replace_addr_tags(cfunc, sl.line)           
         return 0
 
 def FILTER_INIT():

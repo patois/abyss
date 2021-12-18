@@ -1326,8 +1326,8 @@ class ctopy_t(abyss_filter_t):
     """experimental filter that demonstrates how
     to modify decompiled text on the fly."""
 
-    def process_text(self, vu):
-        pc = vu.cfunc.get_pseudocode()
+    def process_text(self, cfunc):
+        pc = cfunc.get_pseudocode()
         lines = "\n".join([ida_lines.tag_remove(sl.line) for sl in pc])
         py = ctopy(lines)
         pc.clear()

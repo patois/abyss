@@ -30,8 +30,8 @@ class signed_op_replacer_t(abyss_filter_t):
                 sample = "/*signed*/"
                 sl.line = sl.line.replace(tag, tag+ida_lines.COLSTR(sample, ida_lines.SCOLOR_ERROR))
 
-    def process_text(self, vu):
-        self.tag_signed_ops(vu.cfunc, SIGNED_EXPR)
+    def process_text(self, cfunc):
+        self.tag_signed_ops(cfunc, SIGNED_EXPR)
         return 0
 
 def FILTER_INIT():

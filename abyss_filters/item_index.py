@@ -18,8 +18,8 @@ class color_addr_info_t(abyss_filter_t):
     """This filter makes COLOR_ADDR tags visible in the
     decompiled code (useful only to developers)."""
 
-    def process_text(self, vu):
-        pc = vu.cfunc.get_pseudocode()
+    def process_text(self, cfunc):
+        pc = cfunc.get_pseudocode()
         for sl in pc:
             sl.line = replace_addr_tags(sl.line)           
         return 0
