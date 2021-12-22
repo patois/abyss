@@ -34,6 +34,12 @@ class abyss_filter_t:
     def maturity_ev(self, cfunc, new_maturity):
         return 0
 
+    def get_lines_rendering_info_ev(self, out, widget, info):
+        return
+
+    def screen_ea_changed_ev(self, ea, prev_ea):
+        return
+
     def is_activated(self):
         return self.activated
 
@@ -138,9 +144,23 @@ class ui_event_t(kw.UI_Hooks):
                         34 if obj.is_activated() else -1)
                     kw.attach_dynamic_action_to_popup(widget, popup_handle, action_desc, POPUP_ENTRY)
 
+        def screen_ea_changed(self, ea, prev_ea):
+            for name, obj in FILTERS.items():
+                if obj.is_activated():
+                    obj.screen_ea_changed_ev(ea, prev_ea)
+            return
+
+        def get_lines_rendering_info(self, out, widget, info):
+            ret = 0
+            for name, obj in FILTERS.items():
+                if obj.is_activated():
+                    obj.get_lines_rendering_info_ev(out, widget, info)
+            return
+
+
 # ----------------------------------------------------------------------------
 """
-via hexrays.chp:
+via hexrays.hpp:
 /// When the possible return value is not specified, your callback
 /// must return zero.
 """
@@ -190,7 +210,8 @@ class abyss_plugin_t(ida_idaapi.plugin_t):
     comment = "Postprocess Hexrays Output"
     help = comment
     wanted_name = PLUGIN_NAME
-    # allows reloading filter scripts while developing them
+    # pressing this hotkey will reload any filter scripts
+    # without having to restart IDA (useful during development)
     wanted_hotkey = "Ctrl-Alt-R"
 
     def init(self):
