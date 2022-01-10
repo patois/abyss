@@ -60,8 +60,8 @@ class item_sync_t(abyss_filter_t):
     n.b.: experimental, untested and unoptimized code.
 
     Can be used alongside IDA's internal synchronization
-    feature (although there may be coloring issues with
-    colors cancelling out each others).
+    feature (the alpha channel of background overlay colors
+    should be set to a value < 1.0).
 
     This plugin uses the "Extra line background overlay #2"
     color from IDA's color options."""
@@ -83,8 +83,9 @@ class item_sync_t(abyss_filter_t):
         return
 
     def screen_ea_changed_ev(self, ea, prev_ea):
-        w = ida_kernwin.get_current_widget()
-        if ida_kernwin.get_widget_type(w) == ida_kernwin.BWN_DISASM:
+        # react to screen ea changes issued by PSEUDOCODE and DISASM views
+        if (ida_kernwin.get_widget_type(ida_kernwin.get_current_widget()) in
+        [ida_kernwin.BWN_PSEUDOCODE, ida_kernwin.BWN_DISASM]):
             self.ea = ea
             # why does refresh_idaview_anyway() work but request_refresh() doesn't?
             #ida_kernwin.clear_refresh_request(ida_kernwin.IWID_PSEUDOCODE)
@@ -93,31 +94,38 @@ class item_sync_t(abyss_filter_t):
         return
 
     def get_lines_rendering_info_ev(self, out, widget, rin):
-        if ida_kernwin.get_widget_type(widget) != ida_kernwin.BWN_PSEUDOCODE:
-            return
+        wt = ida_kernwin.get_widget_type(widget)
+        if wt == ida_kernwin.BWN_PSEUDOCODE:
+            vu = ida_hexrays.get_widget_vdui(widget)
+            if vu:
+                cf = vu.cfunc
+                if cf.entry_ea not in self.funcs:
+                    return
 
-        vu = ida_hexrays.get_widget_vdui(widget)
-        if vu:
-            cf = vu.cfunc
-            if cf.entry_ea not in self.funcs:
-                return
+                vusync = self.funcs[cf.entry_ea]
+                ea = self.ea
+                if ea in vusync:
+                    slist = vusync.get_items(ea)
+                    for section_lines in rin.sections_lines:
+                        for line in section_lines:
+                            lnnum = ida_kernwin.place_t.as_simpleline_place_t(line.at).n
+                            for sync_info in slist:
+                                ix, iy, ilen = sync_info
+                                if lnnum == iy:
+                                    e = ida_kernwin.line_rendering_output_entry_t(line)
+                                    e.bg_color = COLOR
+                                    e.cpx = ix
+                                    e.nchars = ilen
+                                    e.flags |= ida_kernwin.LROEF_CPS_RANGE
+                                    out.entries.push_back(e)
 
-            vusync = self.funcs[cf.entry_ea]
-            ea = self.ea
-            if ea in vusync:
-                slist = vusync.get_items(ea)
-                for section_lines in rin.sections_lines:
-                    for line in section_lines:
-                        lnnum = ida_kernwin.place_t.as_simpleline_place_t(line.at).n
-                        for sync_info in slist:
-                            ix, iy, ilen = sync_info
-                            if lnnum == iy:
-                                e = ida_kernwin.line_rendering_output_entry_t(line)
-                                e.bg_color = COLOR
-                                e.cpx = ix
-                                e.nchars = ilen
-                                e.flags |= ida_kernwin.LROEF_CPS_RANGE
-                                out.entries.push_back(e)
+        elif wt == ida_kernwin.BWN_DISASM:
+            for section_lines in rin.sections_lines:
+                for line in section_lines:
+                    if self.ea == line.at.toea():
+                        e = ida_kernwin.line_rendering_output_entry_t(line)
+                        e.bg_color = COLOR
+                        out.entries.push_back(e)                       
         return
 
 def FILTER_INIT():
