@@ -22,6 +22,9 @@ class abyss_filter_t:
         self.set_activated(False)
         return
 
+    def finish_populating_widget_popup_ev(self, widget, popup_handle):
+        return
+
     def refresh_pseudocode_ev(self, vu):
         return 0
 
@@ -35,6 +38,9 @@ class abyss_filter_t:
         return 0
 
     def maturity_ev(self, cfunc, new_maturity):
+        return 0
+
+    def create_hint_ev(self, vu):
         return 0
 
     def get_lines_rendering_info_ev(self, out, widget, info):
@@ -147,6 +153,12 @@ class ui_event_t(kw.UI_Hooks):
                         34 if obj.is_activated() else -1)
                     kw.attach_dynamic_action_to_popup(widget, popup_handle, action_desc, POPUP_ENTRY)
 
+            for name, obj in FILTERS.items():
+                if obj.is_activated():
+                    obj.finish_populating_widget_popup_ev(widget, popup_handle)
+            return
+
+
         def screen_ea_changed(self, ea, prev_ea):
             for name, obj in FILTERS.items():
                 if obj.is_activated():
@@ -159,7 +171,6 @@ class ui_event_t(kw.UI_Hooks):
                 if obj.is_activated():
                     obj.get_lines_rendering_info_ev(out, widget, info)
             return
-
 
 # ----------------------------------------------------------------------------
 """
@@ -211,7 +222,22 @@ class hx_event_t(hr.Hexrays_Hooks):
             if obj.is_activated():
                 # TBD
                 ret |= obj.maturity_ev(cfunc, new_maturity)
-        return 0        
+        return 0
+
+    def create_hint(self, vu):
+        lines = ""
+        count = 0
+        for name, obj in FILTERS.items():
+            if obj.is_activated():
+                # TBD
+                ret = obj.create_hint_ev(vu)
+                if ret and isinstance(ret, tuple) and len(ret) == 3:
+                    rv, l, n = ret
+                    lines += l
+                    count += n
+        if not count:
+            return 0
+        return (2, lines, count)
 
 # ----------------------------------------------------------------------------
 class abyss_plugin_t(ida_idaapi.plugin_t):
