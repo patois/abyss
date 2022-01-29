@@ -1,4 +1,3 @@
-from tkinter.tix import MAX
 from abyss import abyss_filter_t
 from ida_idaapi import BADADDR
 import ida_kernwin, ida_hexrays, ida_funcs, idautils, ida_name, ida_bytes, ida_ua, ida_idp
