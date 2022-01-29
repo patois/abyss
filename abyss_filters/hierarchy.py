@@ -41,7 +41,7 @@ class hierarchy_t(abyss_filter_t):
                     name = ida_name.get_short_name(self.ea)
                     if not len(name):
                         name = "unkn_%x" % self.ea
-                    self.base_path = "childs [%s]" % name
+                    self.base_path = "%s [callees]" % name
                     self.mr = max_recursion
                     self.mf = max_func
                     self.paths = {}
@@ -81,7 +81,7 @@ class hierarchy_t(abyss_filter_t):
                     name = ida_name.get_short_name(self.ea)
                     if not len(name):
                         name = "unkn_%x" % self.ea
-                    self.base_path = "parents [%s]" % name
+                    self.base_path = "%s [callers]" % name
                     self.mr = max_recursion
                     self.mf = max_func
                     self.paths = {}
