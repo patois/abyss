@@ -67,7 +67,7 @@ class item_sync_t(abyss_filter_t):
     color from IDA's color options."""
 
     def __init__(self):
-        abyss_filter_t.__init__(self)
+        super().__init__()
         self.ea = ida_kernwin.get_screen_ea()
         self.funcs = {}
 
@@ -118,14 +118,6 @@ class item_sync_t(abyss_filter_t):
                                     e.nchars = ilen
                                     e.flags |= ida_kernwin.LROEF_CPS_RANGE
                                     out.entries.push_back(e)
-
-        elif wt == ida_kernwin.BWN_DISASM:
-            for section_lines in rin.sections_lines:
-                for line in section_lines:
-                    if self.ea == line.at.toea():
-                        e = ida_kernwin.line_rendering_output_entry_t(line)
-                        e.bg_color = COLOR
-                        out.entries.push_back(e)                       
         return
 
 def FILTER_INIT():

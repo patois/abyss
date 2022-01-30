@@ -41,7 +41,7 @@ class hierarchy_t(abyss_filter_t):
                     name = ida_name.get_short_name(self.ea)
                     if not len(name):
                         name = "unkn_%x" % self.ea
-                    self.base_path = "%s [callees]" % name
+                    self.base_path = "childs [%s]" % name
                     self.mr = max_recursion
                     self.mf = max_func
                     self.paths = {}
@@ -81,7 +81,7 @@ class hierarchy_t(abyss_filter_t):
                     name = ida_name.get_short_name(self.ea)
                     if not len(name):
                         name = "unkn_%x" % self.ea
-                    self.base_path = "%s [callers]" % name
+                    self.base_path = "parents [%s]" % name
                     self.mr = max_recursion
                     self.mf = max_func
                     self.paths = {}
@@ -156,13 +156,14 @@ class hierarchy_t(abyss_filter_t):
 
             ea = ida_kernwin.get_screen_ea()
             vu = ida_hexrays.get_widget_vdui(widget)
-            if vu:
-                if vu.get_current_item(ida_hexrays.USE_KEYBOARD):
-                    if vu.item.it.is_expr() and vu.item.it.op is ida_hexrays.cot_obj:
-                        _ea = vu.item.e.cexpr.obj_ea
-                        if _ea != BADADDR:
-                            ea = _ea
-            build_menu(ea)
+            if vu and vu.get_current_item(ida_hexrays.USE_KEYBOARD):
+                if vu.item.it.is_expr() and vu.item.it.op is ida_hexrays.cot_obj:
+                    _ea = vu.item.e.cexpr.obj_ea
+                    if _ea != BADADDR:
+                        ea = _ea
+            pfn = ida_funcs.get_func(ea)
+            if pfn and pfn.start_ea == ea:
+                build_menu(ea)
 
 def FILTER_INIT():
     return hierarchy_t()

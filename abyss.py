@@ -153,11 +153,10 @@ class ui_event_t(kw.UI_Hooks):
                         34 if obj.is_activated() else -1)
                     kw.attach_dynamic_action_to_popup(widget, popup_handle, action_desc, POPUP_ENTRY)
 
-            for name, obj in FILTERS.items():
-                if obj.is_activated():
-                    obj.finish_populating_widget_popup_ev(widget, popup_handle)
-            return
-
+                for name, obj in FILTERS.items():
+                    if obj.is_activated():
+                        obj.finish_populating_widget_popup_ev(widget, popup_handle)
+                return
 
         def screen_ea_changed(self, ea, prev_ea):
             for name, obj in FILTERS.items():
@@ -166,10 +165,10 @@ class ui_event_t(kw.UI_Hooks):
             return
 
         def get_lines_rendering_info(self, out, widget, info):
-            ret = 0
-            for name, obj in FILTERS.items():
-                if obj.is_activated():
-                    obj.get_lines_rendering_info_ev(out, widget, info)
+            if kw.get_widget_type(widget) == kw.BWN_PSEUDOCODE:
+                for name, obj in FILTERS.items():
+                    if obj.is_activated():
+                        obj.get_lines_rendering_info_ev(out, widget, info)
             return
 
 # ----------------------------------------------------------------------------
