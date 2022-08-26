@@ -5,6 +5,8 @@ import os, sys, configparser
 
 __author__ = "https://github.com/patois"
 
+DEBUG = False
+
 PLUGIN_NAME = "abyss"
 ACTION_NAME = "%s:" % PLUGIN_NAME
 POPUP_ENTRY = "%s/" % PLUGIN_NAME
@@ -12,6 +14,11 @@ FILTER_DIR = "%s_filters" % PLUGIN_NAME
 CFG_FILENAME = "%s.cfg" % PLUGIN_NAME
 
 FILTERS = {}
+
+# ----------------------------------------------------------------------------
+def dbg_print(s):
+    if DEBUG:
+        print("%s" % s)
 
 # ----------------------------------------------------------------------------
 class abyss_filter_t:
@@ -57,10 +64,10 @@ class abyss_filter_t:
 
 # ----------------------------------------------------------------------------
 def get_cfg_filename():
-    """returns full path for config file."""
+    """returns full path of abyss config file."""
     return os.path.join(
         ida_diskio.get_user_idadir(),
-        "plugins",
+        "cfg",
         "%s" % CFG_FILENAME)
 
 # ----------------------------------------------------------------------------
@@ -93,7 +100,7 @@ def apply_cfg(reload=False, filters={}):
             for name, value in config.items(section):
                 try:
                     filters[name].set_activated(config[section].getboolean(name))
-                    #print("%s -> %s" % (name, value))
+                    dbg_print("%s -> %s" % (name, value))
                 except:
                     pass
     kw.msg("done!\n")
@@ -105,6 +112,8 @@ def load_filters(reload=False):
 
     print("%s: %sloading filters..." % (PLUGIN_NAME, "re" if reload else ""))
     if reload:
+        # TODO: properly clean-up and unload filters
+        #       implement FILTER_EXIT
         FILTERS = {}
     filterdir = os.path.join(os.path.dirname(__file__), FILTER_DIR)
     if os.path.exists(filterdir):
@@ -125,51 +134,59 @@ def load_filters(reload=False):
 
 # ----------------------------------------------------------------------------
 class ui_event_t(kw.UI_Hooks):
-        def finish_populating_widget_popup(self, widget, popup_handle):
-            if kw.get_widget_type(widget) == kw.BWN_PSEUDOCODE:
-                class FilterHandler(kw.action_handler_t):
-                    def __init__(self, name):
-                        self.name = name
-                        kw.action_handler_t.__init__(self)
+    def finish_populating_widget_popup(self, widget, popup_handle):
+        if kw.get_widget_type(widget) == kw.BWN_PSEUDOCODE:
+            class FilterHandler(kw.action_handler_t):
+                def __init__(self, name):
+                    self.name = name
+                    kw.action_handler_t.__init__(self)
 
-                    def activate(self, ctx):
-                        obj = FILTERS[self.name]
-                        obj.set_activated(not obj.is_activated())
-                        vu = hr.get_widget_vdui(ctx.widget)
-                        if vu:
-                            vu.refresh_view(not obj.is_activated())
-                        return 1
+                # on-click event handler for pop-up menu
+                def activate(self, ctx):
+                    # toggle activated state for current filter
+                    obj = FILTERS[self.name]
+                    obj.set_activated(not obj.is_activated())
+                    # refresh current decompiler widget
+                    vu = hr.get_widget_vdui(ctx.widget)
+                    if vu:
+                        vu.refresh_view(not obj.is_activated())
+                    return 1
 
-                    def update(self, ctx):
-                        return kw.AST_ENABLE_FOR_WIDGET
+                def update(self, ctx):
+                    return kw.AST_ENABLE_FOR_WIDGET
 
-                for name, obj in FILTERS.items():
-                    action_desc = kw.action_desc_t(
-                        '%s%s' % (ACTION_NAME, name),
-                        name,
-                        FilterHandler(name),
-                        None,
-                        None,
-                        34 if obj.is_activated() else -1)
-                    kw.attach_dynamic_action_to_popup(widget, popup_handle, action_desc, POPUP_ENTRY)
+            # dynamically create event handler for each filter
+            # and attach to pop-up menu
+            for name, obj in FILTERS.items():
+                action_desc = kw.action_desc_t(
+                    '%s%s' % (ACTION_NAME, name),
+                    name,
+                    FilterHandler(name),
+                    None,
+                    None,
+                    34 if obj.is_activated() else -1)
+                kw.attach_dynamic_action_to_popup(widget, popup_handle, action_desc, POPUP_ENTRY)
 
-                for name, obj in FILTERS.items():
-                    if obj.is_activated():
-                        obj.finish_populating_widget_popup_ev(widget, popup_handle)
-                return
-
-        def screen_ea_changed(self, ea, prev_ea):
+            # forward event finish_populating_widget_popup to activated filters
             for name, obj in FILTERS.items():
                 if obj.is_activated():
-                    obj.screen_ea_changed_ev(ea, prev_ea)
+                    obj.finish_populating_widget_popup_ev(widget, popup_handle)
             return
+    
+    # forward event screen_ea_changed to activated filters
+    def screen_ea_changed(self, ea, prev_ea):
+        for name, obj in FILTERS.items():
+            if obj.is_activated():
+                obj.screen_ea_changed_ev(ea, prev_ea)
+        return
 
-        def get_lines_rendering_info(self, out, widget, info):
-            if kw.get_widget_type(widget) == kw.BWN_PSEUDOCODE:
-                for name, obj in FILTERS.items():
-                    if obj.is_activated():
-                        obj.get_lines_rendering_info_ev(out, widget, info)
-            return
+    # forward event get_lines_rendering_info to activated filters
+    def get_lines_rendering_info(self, out, widget, info):
+        if kw.get_widget_type(widget) == kw.BWN_PSEUDOCODE:
+            for name, obj in FILTERS.items():
+                if obj.is_activated():
+                    obj.get_lines_rendering_info_ev(out, widget, info)
+        return
 
 # ----------------------------------------------------------------------------
 """
@@ -181,6 +198,7 @@ class hx_event_t(hr.Hexrays_Hooks):
     def __init__(self):
         hr.Hexrays_Hooks.__init__(self)
 
+    # forward event refresh_pseudocode to activated filters
     def refresh_pseudocode(self, vu):
         for name, obj in FILTERS.items():
             if obj.is_activated():
@@ -188,6 +206,7 @@ class hx_event_t(hr.Hexrays_Hooks):
                 obj.refresh_pseudocode_ev(vu)
         return 0
 
+    # forward event print_func to activated filters
     def print_func(self, cfunc, vp):
         """via hexrays.hpp:
         ///< Returns: 1 if text has been generated by the plugin
@@ -199,6 +218,7 @@ class hx_event_t(hr.Hexrays_Hooks):
                 custom_text |= obj.print_func_ev(cfunc, vp)
         return custom_text != 0
 
+    # forward event func_printed to activated filters
     def func_printed(self, cfunc):
         ret = 0
         for name, obj in FILTERS.items():
@@ -207,6 +227,7 @@ class hx_event_t(hr.Hexrays_Hooks):
                 ret |= obj.func_printed_ev(cfunc)
         return 0
 
+    # forward event curpos to activated filters
     def curpos(self, vu):
         ret = 0
         for name, obj in FILTERS.items():
@@ -215,6 +236,7 @@ class hx_event_t(hr.Hexrays_Hooks):
                 ret |= obj.curpos_ev(vu)
         return 0
 
+    # forward event maturity to activated filters
     def maturity(self, cfunc, new_maturity):
         ret = 0
         for name, obj in FILTERS.items():
@@ -223,6 +245,7 @@ class hx_event_t(hr.Hexrays_Hooks):
                 ret |= obj.maturity_ev(cfunc, new_maturity)
         return 0
 
+    # forward event create_hint to activated filters
     def create_hint(self, vu):
         lines = ""
         count = 0
@@ -256,8 +279,7 @@ class abyss_plugin_t(ida_idaapi.plugin_t):
             self.hr_hooks = hx_event_t()
             self.hr_hooks.hook()
             return ida_idaapi.PLUGIN_KEEP
-        else:
-            return ida_idaapi.PLUGIN_SKIP
+        return ida_idaapi.PLUGIN_SKIP
 
     def run(self, arg):
         load_filters(reload=True)
