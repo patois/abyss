@@ -8,7 +8,7 @@ Right-click within a decompiler view, pick a filter
 from the abyss context menu.
 
 Per-filter default settings can be changed by editing
-the config file: "%APPDATA%/Hex-Rays/IDA Pro/plugins/abyss.cfg"
+the config file: "%APPDATA%/Hex-Rays/IDA Pro/cfg/abyss.cfg"
 
 ## Disclaimer
 Experimental/WIP code, use at your own risk :)
