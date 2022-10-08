@@ -24,14 +24,8 @@ restart IDA.
 
 ## Example filters (incomplete list)
 
-### lvars_alias.py (assign variables names depending on context)
-![abyss lvars alias gif](/rsrc/varrename.gif?raw=true)
-
-### signed_ops.py (identify signed operators)
+### signed_ops.py
 ![abyss signedops gif](/rsrc/signedops.gif?raw=true)
 
-### lvars_info.py (append additional info to variable names)
-![abyss lvars gif](/rsrc/lvars.gif?raw=true)
-
-### func_colorizer.py (colorize function names)
+### token_colorizer.py
 ![abyss func gif](/rsrc/func.gif?raw=true)
