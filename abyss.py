@@ -91,8 +91,8 @@ def apply_cfg(reload=False, filters={}):
             return False
         return apply_cfg(reload=True)
 
-    config = configparser.RawConfigParser()
-    config.readfp(open(cfg_file))
+    config = configparser.ConfigParser()
+    config.read(cfg_file)
 
     # read all sections
     for section in config.sections():
