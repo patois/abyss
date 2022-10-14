@@ -107,9 +107,17 @@ def apply_cfg(reload=False, filters={}):
     return True
 
 # ----------------------------------------------------------------------------
+def create_cfg_folder():
+    cfg_file = get_cfg_filename()
+    if not os.path.isfile(cfg_file):
+        os.makedirs(os.path.dirname(cfg_file))
+    return
+
+# ----------------------------------------------------------------------------
 def load_filters(reload=False):
     global FILTERS
 
+    create_cfg_folder()
     print("%s: %sloading filters..." % (PLUGIN_NAME, "re" if reload else ""))
     if reload:
         # TODO: properly clean-up and unload filters
