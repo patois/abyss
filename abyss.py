@@ -110,7 +110,7 @@ def apply_cfg(reload=False, filters={}):
 def create_cfg_folder():
     cfg_file = get_cfg_filename()
     if not os.path.isfile(cfg_file):
-        os.makedirs(os.path.dirname(cfg_file))
+        os.makedirs(os.path.dirname(cfg_file), exist_ok=True)
     return
 
 # ----------------------------------------------------------------------------
